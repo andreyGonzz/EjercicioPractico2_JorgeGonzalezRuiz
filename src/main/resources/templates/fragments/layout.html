@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- Fragment: Head -->
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Sistema de Gestión</title>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/webjars/font-awesome/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+        }
+        main {
+            flex: 1;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .footer {
+            background-color: #343a40;
+            padding: 20px 0;
+            margin-top: auto;
+        }
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+            margin-bottom: 1.5rem;
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        .btn {
+            border-radius: 0.375rem;
+        }
+    </style>
+</head>
+            margin-top: auto;
+        }
+    </style>
+</head>
+
+<!-- Fragment: Dynamic Navbar -->
+<div th:fragment="navbar" sec:authorize="isAuthenticated()">
+    <!-- Navbar para ADMIN -->
+    <nav sec:authorize="hasRole('ADMIN')" th:replace="~{fragments/layout :: navbar-admin}"></nav>
+    <!-- Navbar para PROFESOR -->
+    <nav sec:authorize="hasRole('PROFESOR')" th:replace="~{fragments/layout :: navbar-profesor}"></nav>
+    <!-- Navbar para ESTUDIANTE -->
+    <nav sec:authorize="hasRole('ESTUDIANTE')" th:replace="~{fragments/layout :: navbar-estudiante}"></nav>
+</div>
+
+<!-- Fragment: Header -->
+<header th:fragment="header" class="bg-light py-2 border-bottom">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h6 class="mb-0 text-muted">
+                    <i class="fas fa-university me-2"></i>
+                    Sistema de Gestión Académica
+                </h6>
+            </div>
+            <div class="col-md-6 text-end">
+                <small class="text-muted">
+                    <i class="fas fa-calendar-alt me-1"></i>
+                    <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}"></span>
+                </small>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Fragment: Navbar Admin -->
+<nav th:fragment="navbar-admin" class="navbar navbar-expand-lg navbar-dark bg-danger">
+    <div class="container">
+        <a class="navbar-brand" href="/admin/dashboard">
+            <i class="fas fa-user-shield me-2"></i>Panel de Administración
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarAdmin">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarAdmin">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/dashboard">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-users me-1"></i>Usuarios
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/admin/usuarios">
+                            <i class="fas fa-list me-2"></i>Listar Usuarios
+                        </a></li>
+                        <li><a class="dropdown-item" href="/admin/usuarios/nuevo">
+                            <i class="fas fa-user-plus me-2"></i>Crear Usuario
+                        </a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-tag me-1"></i>Roles
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/admin/roles">
+                            <i class="fas fa-list me-2"></i>Gestionar Roles
+                        </a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/consultas">
+                        <i class="fas fa-search me-1"></i>Consultas Avanzadas
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user me-1"></i>
+                        <span th:text="${#authentication.name}">Usuario</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/perfil">
+                            <i class="fas fa-user-cog me-2"></i>Mi Perfil
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                                <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Fragment: Navbar Profesor -->
+<nav th:fragment="navbar-profesor" class="navbar navbar-expand-lg navbar-dark bg-warning">
+    <div class="container">
+        <a class="navbar-brand text-dark" href="/profesor/dashboard">
+            <i class="fas fa-chalkboard-teacher me-2"></i>Panel de Profesor
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarProfesor">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarProfesor">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="/profesor/dashboard">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="/profesor/reportes">
+                        <i class="fas fa-chart-line me-1"></i>Reportes
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user me-1"></i>
+                        <span th:text="${#authentication.name}">Usuario</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/profesor/perfil">
+                            <i class="fas fa-user-cog me-2"></i>Mi Perfil
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                                <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Fragment: Navbar Estudiante -->
+<nav th:fragment="navbar-estudiante" class="navbar navbar-expand-lg navbar-dark bg-info">
+    <div class="container">
+        <a class="navbar-brand" href="/estudiante/dashboard">
+            <i class="fas fa-graduation-cap me-2"></i>Panel de Estudiante
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarEstudiante">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarEstudiante">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/estudiante/dashboard">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/estudiante/perfil">
+                        <i class="fas fa-user me-1"></i>Mi Perfil
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user me-1"></i>
+                        <span th:text="${#authentication.name}">Usuario</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/estudiante/perfil">
+                            <i class="fas fa-user-cog me-2"></i>Mi Perfil
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                                <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Fragment: Footer -->
+<footer th:fragment="footer" class="footer bg-dark text-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Sistema de Gestión Académica</h6>
+                <p class="mb-0">Plataforma integral para la administración educativa</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <p class="mb-0">
+                    <small>
+                        <i class="fas fa-code me-1"></i>
+                        Desarrollado con Spring Boot & Thymeleaf
+                    </small>
+                </p>
+                <p class="mb-0">
+                    <small class="text-muted">
+                        © 2025 - Todos los derechos reservados
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Fragment: Scripts -->
+<div th:fragment="scripts">
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/js/bootstrap.bundle.min.js"></script>
+</div>
+
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Gestión de Roles')}"></head>
+<body>
+    <!-- Header -->
+    <header th:replace="~{fragments/layout :: header}"></header>
+    
+    <!-- Navbar dinámico -->
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    
+    <!-- Main Content -->
+    <main class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>
+                        <i class="fas fa-user-tag me-2 text-success"></i>Gestión de Roles
+                    </h2>
+                    <a href="/admin/roles/nuevo" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Nuevo Rol
+                    </a>
+                </div>
+                
+                <!-- Mensajes de éxito/error -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <!-- Tabla de roles -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>Lista de Roles del Sistema
+                            <span class="badge bg-secondary ms-2" th:text="${roles.size()}">0</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${roles.empty}" class="text-center py-4">
+                            <i class="fas fa-user-tag fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No hay roles configurados</h5>
+                            <a href="/admin/roles/nuevo" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Crear primer rol
+                            </a>
+                        </div>
+                        
+                        <div th:unless="${roles.empty}">
+                            <div class="row">
+                                <div th:each="rol : ${roles}" class="col-md-6 col-lg-4 mb-4">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-header text-center" 
+                                             th:classappend="${rol.nombre == 'ADMIN'} ? 'bg-danger text-white' : (${rol.nombre == 'PROFESOR'} ? 'bg-success text-white' : 'bg-primary text-white')">>
+                                            <h5 class="mb-0" th:text="${rol.nombre}">ROL</h5>
+                                        </div>
+                                        <div class="card-body d-flex flex-column">
+                                            <div class="mb-3">
+                                                <small class="text-muted">ID:</small>
+                                                <span th:text="${rol.id}">1</span>
+                                            </div>
+                                            
+                                            <div class="mb-3 flex-grow-1">
+                                                <small class="text-muted">Descripción:</small>
+                                                <p class="card-text mt-1" th:text="${rol.descripcion}">Descripción del rol</p>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <small class="text-muted">Usuarios asignados:</small>
+                                                <div class="mt-1">
+                                                    <span class="badge bg-info" 
+                                                          th:text="${rol.usuarios != null ? rol.usuarios.size() : 0}">0</span>
+                                                    <span class="ms-2">usuarios</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="d-grid gap-2">
+                                                <div class="btn-group" role="group">
+                                                    <a th:href="@{/admin/roles/{id}(id=${rol.id})}" 
+                                                       class="btn btn-sm btn-outline-info">
+                                                        <i class="fas fa-eye"></i> Ver
+                                                    </a>
+                                                    <a th:href="@{/admin/roles/{id}/editar(id=${rol.id})}" 
+                                                       class="btn btn-sm btn-outline-warning">
+                                                        <i class="fas fa-edit"></i> Editar
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                            data-bs-toggle="modal" 
+                                                            th:data-bs-target="'#deleteModal' + ${rol.id}"
+                                                            th:disabled="${rol.usuarios != null && !rol.usuarios.empty}">
+                                                        <i class="fas fa-trash"></i> Eliminar
+                                                    </button>
+                                                </div>
+                                                
+                                                <div th:if="${rol.usuarios != null && !rol.usuarios.empty}" 
+                                                     class="alert alert-warning alert-sm mt-2 mb-0">
+                                                    <small>
+                                                        <i class="fas fa-info-circle me-1"></i>
+                                                        No se puede eliminar - Tiene usuarios asignados
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Modal de confirmación de eliminación -->
+                                            <div class="modal fade" th:id="'deleteModal' + ${rol.id}" tabindex="-1">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Confirmar Eliminación</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p>¿Estás seguro de que deseas eliminar este rol?</p>
+                                                            <div class="alert alert-warning">
+                                                                <strong th:text="${rol.nombre}">Rol</strong><br>
+                                                                <small th:text="${rol.descripcion}">Descripción</small>
+                                                            </div>
+                                                            <small class="text-muted">Esta acción no se puede deshacer.</small>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                            <form th:action="@{/admin/roles/{id}/eliminar(id=${rol.id})}" method="post" style="display: inline;">
+                                                                <button type="submit" class="btn btn-danger">
+                                                                    <i class="fas fa-trash me-2"></i>Eliminar
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Información adicional -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Información sobre Roles
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6 class="text-danger">
+                                    <i class="fas fa-crown me-2"></i>ADMIN
+                                </h6>
+                                <ul class="small">
+                                    <li>Acceso completo al sistema</li>
+                                    <li>Gestión de usuarios y roles</li>
+                                    <li>Consultas avanzadas</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-success">
+                                    <i class="fas fa-chalkboard-teacher me-2"></i>PROFESOR
+                                </h6>
+                                <ul class="small">
+                                    <li>Gestión de reportes</li>
+                                    <li>Visualización de estudiantes</li>
+                                    <li>Acceso limitado a datos</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-primary">
+                                    <i class="fas fa-graduation-cap me-2"></i>ESTUDIANTE
+                                </h6>
+                                <ul class="small">
+                                    <li>Vista de perfil personal</li>
+                                    <li>Acceso básico a información</li>
+                                    <li>Sin permisos administrativos</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Botón de regreso -->
+                <div class="mt-4">
+                    <a href="/admin/dashboard" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

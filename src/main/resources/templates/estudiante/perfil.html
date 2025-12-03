@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Mi Perfil - Estudiante')}"></head>
+<body>
+    <!-- Header -->
+    <header th:replace="~{fragments/layout :: header}"></header>
+    
+    <!-- Navbar dinámico -->
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    
+    <!-- Main Content -->
+    <main class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">
+                    <i class="fas fa-user me-2"></i>Mi Perfil
+                </h1>
+                
+                <!-- Mensajes de alerta -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-id-card me-2"></i>Información Personal
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Nombre:</label>
+                                    <p class="form-control-plaintext" th:text="${usuario?.nombre}">-</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Apellido:</label>
+                                    <p class="form-control-plaintext" th:text="${usuario?.apellido}">-</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Email:</label>
+                                    <p class="form-control-plaintext">
+                                        <a th:href="'mailto:' + ${usuario?.email}" th:text="${usuario?.email}">-</a>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Rol:</label>
+                                    <p class="form-control-plaintext">
+                                        <span class="badge bg-info fs-6" th:text="${usuario?.rol?.nombre}">-</span>
+                                    </p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Estado:</label>
+                                    <p class="form-control-plaintext">
+                                        <span th:if="${usuario?.activo}" class="badge bg-success fs-6">Activo</span>
+                                        <span th:unless="${usuario?.activo}" class="badge bg-secondary fs-6">Inactivo</span>
+                                    </p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Miembro desde:</label>
+                                    <p class="form-control-plaintext" 
+                                       th:text="${usuario?.fechaCreacion != null ? #temporals.format(usuario.fechaCreacion, 'dd/MM/yyyy') : '-'}">-</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil">
+                                <i class="fas fa-edit me-1"></i>Editar Perfil
+                            </button>
+                            <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalCambiarPassword">
+                                <i class="fas fa-lock me-1"></i>Cambiar Contraseña
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Información
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <h6>Acceso del Estudiante:</h6>
+                            <ul class="mb-0">
+                                <li>Ver tu perfil personal</li>
+                                <li>Editar información básica</li>
+                                <li>Cambiar contraseña</li>
+                                <li>Acceso limitado al sistema</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="text-center">
+                            <i class="fas fa-user-graduate fa-4x text-info mb-3"></i>
+                            <p class="text-muted">Estudiante</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>Actividad
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <p class="text-muted">Estadísticas de actividad próximamente...</p>
+                        <i class="fas fa-chart-line fa-3x text-muted"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Editar Perfil -->
+        <div class="modal fade" id="modalEditarPerfil" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Editar Perfil</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form th:action="@{/estudiante/perfil/actualizar}" method="post">
+                        <input type="hidden" th:value="${usuario?.id}" name="id">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" 
+                                       th:value="${usuario?.nombre}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="apellido" class="form-label">Apellido</label>
+                                <input type="text" class="form-control" id="apellido" name="apellido" 
+                                       th:value="${usuario?.apellido}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       th:value="${usuario?.email}" required readonly>
+                                <small class="form-text text-muted">El email no puede ser modificado</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Cambiar Contraseña -->
+        <div class="modal fade" id="modalCambiarPassword" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cambiar Contraseña</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form th:action="@{/estudiante/perfil/cambiar-password}" method="post">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="passwordActual" class="form-label">Contraseña Actual</label>
+                                <input type="password" class="form-control" id="passwordActual" name="passwordActual" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="passwordNueva" class="form-label">Nueva Contraseña</label>
+                                <input type="password" class="form-control" id="passwordNueva" name="passwordNueva" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="passwordConfirmar" class="form-label">Confirmar Nueva Contraseña</label>
+                                <input type="password" class="form-control" id="passwordConfirmar" name="passwordConfirmar" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Cambiar Contraseña</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+    
+    <script>
+        // Validación del formulario de cambio de contraseña
+        document.querySelector('form[action="/estudiante/perfil/cambiar-password"]').addEventListener('submit', function(e) {
+            const passwordNueva = document.getElementById('passwordNueva').value;
+            const passwordConfirmar = document.getElementById('passwordConfirmar').value;
+            
+            if (passwordNueva !== passwordConfirmar) {
+                e.preventDefault();
+                alert('Las nuevas contraseñas no coinciden');
+                return false;
+            }
+            
+            if (passwordNueva.length < 6) {
+                e.preventDefault();
+                alert('La nueva contraseña debe tener al menos 6 caracteres');
+                return false;
+            }
+        });
+        
+        // Auto-ocultar alertas después de 5 segundos
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                const closeButton = alert.querySelector('.btn-close');
+                if (closeButton) {
+                    closeButton.click();
+                }
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

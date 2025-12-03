@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Consultas Administrativas')}"></head>
+<body>
+    <header th:replace="~{fragments/layout :: header}"></header>
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+
+    <main class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="mb-4">
+                    <i class="fas fa-chart-line me-2 text-primary"></i>
+                    Consultas Administrativas
+                </h2>
+
+                <!-- Estadísticas Generales -->
+                <div class="row mb-4">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 th:text="${totalUsuarios ?: 0}">0</h4>
+                                        <p class="mb-0">Total Usuarios</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-users fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 th:text="${totalAdministradores ?: 0}">0</h4>
+                                        <p class="mb-0">Administradores</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-user-shield fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 th:text="${totalProfesores ?: 0}">0</h4>
+                                        <p class="mb-0">Profesores</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 th:text="${totalEstudiantes ?: 0}">0</h4>
+                                        <p class="mb-0">Estudiantes</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-graduation-cap fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Listado de Todos los Usuarios -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>
+                            Listado Completo de Usuarios
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${todosUsuarios != null and !todosUsuarios.empty}">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nombre</th>
+                                            <th>Email</th>
+                                            <th>Rol</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="usuario : ${todosUsuarios}">
+                                            <td th:text="${usuario.id}">1</td>
+                                            <td th:text="${usuario.nombre + ' ' + usuario.apellido}">Nombre Completo</td>
+                                            <td th:text="${usuario.email}">email@ejemplo.com</td>
+                                            <td>
+                                                <span th:if="${usuario.rol.nombre == 'ADMIN'}" class="badge bg-danger">ADMIN</span>
+                                                <span th:if="${usuario.rol.nombre == 'PROFESOR'}" class="badge bg-warning">PROFESOR</span>
+                                                <span th:if="${usuario.rol.nombre == 'ESTUDIANTE'}" class="badge bg-info">ESTUDIANTE</span>
+                                            </td>
+                                            <td>
+                                                <span th:if="${usuario.activo}" class="badge bg-success">Activo</span>
+                                                <span th:unless="${usuario.activo}" class="badge bg-secondary">Inactivo</span>
+                                            </td>
+                                            <td>
+                                                <a th:href="@{/admin/usuarios/{id}(id=${usuario.id})}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i> Ver
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div th:if="${todosUsuarios == null or todosUsuarios.empty}" class="text-center py-4">
+                            <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No hay usuarios registrados en el sistema</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Usuarios por Rol -->
+                <div class="row mt-4">
+                    <!-- Administradores -->
+                    <div class="col-lg-4 mb-4">
+                        <div class="card">
+                            <div class="card-header bg-danger text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-user-shield me-2"></i>
+                                    Administradores
+                                    <span class="badge bg-white text-danger ms-2" th:text="${totalAdministradores ?: 0}">0</span>
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div th:if="${administradores != null and !administradores.empty}">
+                                    <div th:each="admin : ${administradores}" class="mb-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <small class="fw-bold" th:text="${admin.nombre + ' ' + admin.apellido}">Nombre</small>
+                                                <br>
+                                                <small class="text-muted" th:text="${admin.email}">email</small>
+                                            </div>
+                                        </div>
+                                        <hr th:unless="${adminStat.last}" class="my-2">
+                                    </div>
+                                </div>
+                                <div th:if="${administradores == null or administradores.empty}" class="text-muted text-center">
+                                    <i class="fas fa-user-times"></i> No hay administradores
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profesores -->
+                    <div class="col-lg-4 mb-4">
+                        <div class="card">
+                            <div class="card-header bg-warning text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-chalkboard-teacher me-2"></i>
+                                    Profesores
+                                    <span class="badge bg-white text-warning ms-2" th:text="${totalProfesores ?: 0}">0</span>
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div th:if="${profesores != null and !profesores.empty}">
+                                    <div th:each="profesor : ${profesores}" class="mb-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <small class="fw-bold" th:text="${profesor.nombre + ' ' + profesor.apellido}">Nombre</small>
+                                                <br>
+                                                <small class="text-muted" th:text="${profesor.email}">email</small>
+                                            </div>
+                                        </div>
+                                        <hr th:unless="${profesorStat.last}" class="my-2">
+                                    </div>
+                                </div>
+                                <div th:if="${profesores == null or profesores.empty}" class="text-muted text-center">
+                                    <i class="fas fa-user-times"></i> No hay profesores
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estudiantes -->
+                    <div class="col-lg-4 mb-4">
+                        <div class="card">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-graduation-cap me-2"></i>
+                                    Estudiantes
+                                    <span class="badge bg-white text-info ms-2" th:text="${totalEstudiantes ?: 0}">0</span>
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div th:if="${estudiantes != null and !estudiantes.empty}">
+                                    <div th:each="estudiante : ${estudiantes}" class="mb-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <small class="fw-bold" th:text="${estudiante.nombre + ' ' + estudiante.apellido}">Nombre</small>
+                                                <br>
+                                                <small class="text-muted" th:text="${estudiante.email}">email</small>
+                                            </div>
+                                        </div>
+                                        <hr th:unless="${estudianteStat.last}" class="my-2">
+                                    </div>
+                                </div>
+                                <div th:if="${estudiantes == null or estudiantes.empty}" class="text-muted text-center">
+                                    <i class="fas fa-user-times"></i> No hay estudiantes
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Consultas Rápidas -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-search me-2"></i>
+                            Consultas Rápidas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <button class="btn btn-outline-success w-100" onclick="mostrarUsuarios('activos')">
+                                    <i class="fas fa-user-check me-2"></i>
+                                    Usuarios Activos
+                                </button>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <button class="btn btn-outline-danger w-100" onclick="mostrarUsuarios('inactivos')">
+                                    <i class="fas fa-user-times me-2"></i>
+                                    Usuarios Inactivos
+                                </button>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <button class="btn btn-outline-info w-100" onclick="mostrarEstadisticas()">
+                                    <i class="fas fa-chart-bar me-2"></i>
+                                    Estadísticas
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Consultas básicas disponibles
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function mostrarUsuarios(tipo) {
+            if (tipo === 'activos') {
+                alert('Total de usuarios activos: ' + (document.querySelector('[data-activos]') ? document.querySelector('[data-activos]').textContent : '0'));
+            } else if (tipo === 'inactivos') {
+                const total = parseInt(document.querySelector('[data-total]') ? document.querySelector('[data-total]').textContent : '0');
+                const activos = parseInt(document.querySelector('[data-activos]') ? document.querySelector('[data-activos]').textContent : '0');
+                alert('Total de usuarios inactivos: ' + (total - activos));
+            }
+        }
+
+        function mostrarEstadisticas() {
+            const total = document.querySelector('[data-total]') ? document.querySelector('[data-total]').textContent : '0';
+            const activos = document.querySelector('[data-activos]') ? document.querySelector('[data-activos]').textContent : '0';
+            alert('Estadísticas del Sistema:\\nTotal usuarios: ' + total + '\\nUsuarios activos: ' + activos + '\\nUsuarios inactivos: ' + (parseInt(total) - parseInt(activos)));
+        }
+    </script>
+
+    <!-- Datos para JavaScript (ocultos) -->
+    <div class="d-none">
+        <span data-total th:text="${totalUsuarios ?: 0}">0</span>
+        <span data-activos th:text="${usuariosActivos ?: 0}">0</span>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
+                <div class="row mb-4">
+                    <div class="col-md-2">
+                        <div class="card text-center bg-primary text-white">
+                            <div class="card-body">
+                                <h3 th:text="${totalUsuarios}">0</h3>
+                                <small>Total Usuarios</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card text-center bg-success text-white">
+                            <div class="card-body">
+                                <h3 th:text="${usuariosActivos}">0</h3>
+                                <small>Usuarios Activos</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card text-center bg-danger text-white">
+                            <div class="card-body">
+                                <h3 th:text="${totalAdministradores}">0</h3>
+                                <small>Administradores</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card text-center bg-success text-white">
+                            <div class="card-body">
+                                <h3 th:text="${totalProfesores}">0</h3>
+                                <small>Profesores</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card text-center bg-info text-white">
+                            <div class="card-body">
+                                <h3 th:text="${totalEstudiantes}">0</h3>
+                                <small>Estudiantes</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card text-center bg-secondary text-white">
+                            <div class="card-body">
+                                <h3 th:text="${totalUsuarios - usuariosActivos}">0</h3>
+                                <small>Inactivos</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Consultas Disponibles -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" data-bs-toggle="tab" href="#todos-usuarios" role="tab">
+                                            <i class="fas fa-users me-2"></i>Todos los Usuarios
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-bs-toggle="tab" href="#por-roles" role="tab">
+                                            <i class="fas fa-user-tag me-2"></i>Por Roles
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-bs-toggle="tab" href="#por-estado" role="tab">
+                                            <i class="fas fa-toggle-on me-2"></i>Por Estado
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-body">
+                                <div class="tab-content">
+                                    <!-- Tab: Todos los Usuarios -->
+                                    <div class="tab-pane fade show active" id="todos-usuarios" role="tabpanel">
+                                        <h5 class="mb-3">
+                                            <i class="fas fa-list me-2"></i>Lista Completa de Usuarios
+                                            <span class="badge bg-primary" th:text="${todosUsuarios.size()}">0</span>
+                                        </h5>
+                                        
+                                        <div th:if="${todosUsuarios.empty}" class="text-center py-4">
+                                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                            <p class="text-muted">No hay usuarios registrados en el sistema</p>
+                                        </div>
+                                        
+                                        <div th:unless="${todosUsuarios.empty}" class="table-responsive">
+                                            <table class="table table-striped table-hover">
+                                                <thead class="table-dark">
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>Nombre Completo</th>
+                                                        <th>Email</th>
+                                                        <th>Rol</th>
+                                                        <th>Estado</th>
+                                                        <th>Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr th:each="usuario : ${todosUsuarios}">
+                                                        <td th:text="${usuario.id}">1</td>
+                                                        <td th:text="${usuario.nombre + ' ' + usuario.apellido}">Nombre</td>
+                                                        <td th:text="${usuario.email}">email@example.com</td>
+                                                        <td>
+                                                            <span th:if="${usuario.rol.nombre == 'ADMIN'}" class="badge bg-danger" th:text="${usuario.rol.nombre}">ROL</span>
+                                                            <span th:if="${usuario.rol.nombre == 'PROFESOR'}" class="badge bg-warning" th:text="${usuario.rol.nombre}">ROL</span>
+                                                            <span th:if="${usuario.rol.nombre == 'ESTUDIANTE'}" class="badge bg-info" th:text="${usuario.rol.nombre}">ROL</span>
+                                                        </td>
+                                                        <td>
+                                                            <span th:if="${usuario.activo}" class="badge bg-success">Activo</span>
+                                                            <span th:unless="${usuario.activo}" class="badge bg-secondary">Inactivo</span>
+                                                        </td>
+                                                        <td>
+                                                            <a th:href="@{/admin/usuarios/{id}(id=${usuario.id})}" 
+                                                               class="btn btn-sm btn-outline-info">
+                                                                <i class="fas fa-eye"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Tab: Por Roles -->
+                                    <div class="tab-pane fade" id="por-roles" role="tabpanel">
+                                        <h5 class="mb-3">
+                                            <i class="fas fa-users-cog me-2"></i>Usuarios Agrupados por Rol
+                                        </h5>
+                                        
+                                        <!-- Administradores -->
+                                        <div class="accordion mb-4" id="rolesAccordion">
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdmins">
+                                                        <i class="fas fa-crown me-2 text-danger"></i>
+                                                        Administradores <span class="badge bg-danger ms-2" th:text="${totalAdministradores ?: 0}">0</span>
+                                                    </button>
+                                                </h2>
+                                                <div id="collapseAdmins" class="accordion-collapse collapse show" data-bs-parent="#rolesAccordion">
+                                                    <div class="accordion-body">
+                                                        <div th:if="${totalAdministradores == 0}" class="text-muted">No hay administradores registrados</div>
+                                                        <div th:unless="${administradores.empty}" class="row">
+                                                            <div th:each="admin : ${administradores}" class="col-md-6 mb-2">
+                                                                <div class="card">
+                                                                    <div class="card-body py-2">
+                                                                        <small class="text-muted">ID: [[${admin.id}]]</small>
+                                                                        <div th:text="${admin.nombre + ' ' + admin.apellido}">Admin</div>
+                                                                        <small th:text="${admin.email}">email</small>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Profesores -->
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProfesores">
+                                                        <i class="fas fa-chalkboard-teacher me-2 text-success"></i>
+                                                        Profesores <span class="badge bg-success ms-2" th:text="${totalProfesores ?: 0}">0</span>
+                                                    </button>
+                                                </h2>
+                                                <div id="collapseProfesores" class="accordion-collapse collapse" data-bs-parent="#rolesAccordion">
+                                                    <div class="accordion-body">
+                                                        <div th:if="${totalProfesores == 0}" class="text-muted">No hay profesores registrados</div>
+                                                        <div th:unless="${totalProfesores == 0}" class="row">
+                                                            <div th:each="profesor : ${profesores}" class="col-md-6 mb-2">
+                                                                <div class="card">
+                                                                    <div class="card-body py-2">
+                                                                        <small class="text-muted">ID: [[${profesor.id}]]</small>
+                                                                        <div th:text="${profesor.nombre + ' ' + profesor.apellido}">Profesor</div>
+                                                                        <small th:text="${profesor.email}">email</small>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Estudiantes -->
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEstudiantes">
+                                                        <i class="fas fa-graduation-cap me-2 text-primary"></i>
+                                                        Estudiantes <span class="badge bg-primary ms-2" th:text="${totalEstudiantes ?: 0}">0</span>
+                                                    </button>
+                                                </h2>
+                                                <div id="collapseEstudiantes" class="accordion-collapse collapse" data-bs-parent="#rolesAccordion">
+                                                    <div class="accordion-body">
+                                                        <div th:if="${totalEstudiantes == 0}" class="text-muted">No hay estudiantes registrados</div>
+                                                        <div th:unless="${totalEstudiantes == 0}" class="row">
+                                                            <div th:each="estudiante : ${estudiantes}" class="col-md-6 mb-2">
+                                                                <div class="card">
+                                                                    <div class="card-body py-2">
+                                                                        <small class="text-muted">ID: [[${estudiante.id}]]</small>
+                                                                        <div th:text="${estudiante.nombre + ' ' + estudiante.apellido}">Estudiante</div>
+                                                                        <small th:text="${estudiante.email}">email</small>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Tab: Por Estado -->
+                                    <div class="tab-pane fade" id="por-estado" role="tabpanel">
+                                        <h5 class="mb-3">
+                                            <i class="fas fa-toggle-on me-2"></i>Usuarios por Estado
+                                        </h5>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="card border-success">
+                                                    <div class="card-header bg-success text-white">
+                                                        <h6 class="mb-0">
+                                                            <i class="fas fa-user-check me-2"></i>Usuarios Activos 
+                                                            <span class="badge bg-light text-success" th:text="${usuariosActivos.size()}">0</span>
+                                                        </h6>
+                                                    </div>
+                                                    <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                                                        <div th:if="${usuariosActivos.empty}" class="text-muted">No hay usuarios activos</div>
+                                                        <div th:unless="${usuariosActivos.empty}">
+                                                            <div th:each="usuario : ${usuariosActivos}" class="border-bottom py-2">
+                                                                <div class="d-flex justify-content-between">
+                                                                    <div>
+                                                                        <div th:text="${usuario.nombre + ' ' + usuario.apellido}">Usuario</div>
+                                                                        <small class="text-muted" th:text="${usuario.email}">email</small>
+                                                                    </div>
+                                                                    <span th:if="${usuario.rol.nombre == 'ADMIN'}" class="badge bg-danger" th:text="${usuario.rol.nombre}">ROL</span>
+                                                                    <span th:if="${usuario.rol.nombre == 'PROFESOR'}" class="badge bg-warning" th:text="${usuario.rol.nombre}">ROL</span>
+                                                                    <span th:if="${usuario.rol.nombre == 'ESTUDIANTE'}" class="badge bg-info" th:text="${usuario.rol.nombre}">ROL</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-6">
+                                                <div class="card border-secondary">
+                                                    <div class="card-header bg-secondary text-white">
+                                                        <h6 class="mb-0">
+                                                            <i class="fas fa-user-times me-2"></i>Usuarios Inactivos 
+                                                            <span class="badge bg-light text-secondary" th:text="${totalUsuarios - usuariosActivos}">0</span>
+                                                        </h6>
+                                                    </div>
+                                                    <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                                                        <div th:if="${totalUsuarios == usuariosActivos}" class="text-muted">Todos los usuarios están activos</div>
+                                                        <div th:unless="${totalUsuarios == usuariosActivos}">
+                                                            <div th:each="usuario : ${todosUsuarios}" th:if="${!usuario.activo}" class="border-bottom py-2">
+                                                                <div class="d-flex justify-content-between">
+                                                                    <div>
+                                                                        <div th:text="${usuario.nombre + ' ' + usuario.apellido}">Usuario</div>
+                                                                        <small class="text-muted" th:text="${usuario.email}">email</small>
+                                                                    </div>
+                                                                    <span class="badge bg-secondary" th:text="${usuario.rol.nombre}">ROL</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="alert alert-info mt-4">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <strong>Funciones de consulta disponibles en UsuarioRepository:</strong>
+                                            <ul class="mb-0 mt-2">
+                                                <li><code>findByEmail(email)</code> - Buscar por email específico</li>
+                                                <li><code>findByActivo(activo)</code> - Filtrar por estado activo/inactivo</li>
+                                                <li><code>findByRol(rol)</code> - Filtrar por objeto Rol</li>
+                                                <li><code>findByRolNombre(nombreRol)</code> - Filtrar por nombre de rol</li>
+                                                <li><code>findByNombreContaining...OrApellidoContaining...</code> - Búsqueda parcial</li>
+                                                <li><code>existsByEmail(email)</code> - Verificar existencia de email</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Botón de regreso -->
+                <div class="mt-4">
+                    <a href="/admin/dashboard" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+                    </a>
+                    <a href="/admin/usuarios" class="btn btn-primary ms-2">
+                        <i class="fas fa-users me-2"></i>Gestionar Usuarios
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
+                                        <option value="false">Inactivos</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Texto:</label>
+                                    <input type="text" class="form-control" id="textoBusqueda" placeholder="Buscar...">
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search me-1"></i>Buscar
+                                    </button>
+                                    <button type="reset" class="btn btn-secondary">
+                                        <i class="fas fa-times me-1"></i>Limpiar
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>Resultados de la Búsqueda
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="resultados" class="text-center text-muted py-4">
+                            <i class="fas fa-search fa-3x mb-3"></i>
+                            <p>Realiza una búsqueda para ver los resultados</p>
+                        </div>
+                        
+                        <!-- Template para resultados de usuarios -->
+                        <div id="resultadosUsuarios" style="display: none;">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nombre</th>
+                                            <th>Email</th>
+                                            <th>Rol</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaUsuarios">
+                                        <!-- Los resultados se cargarán aquí -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Estadísticas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="estadisticas">
+                            <div class="mb-3">
+                                <span class="text-muted">Total de usuarios:</span>
+                                <span class="badge bg-primary ms-2" th:text="${totalUsuarios ?: 0}">0</span>
+                            </div>
+                            <div class="mb-3">
+                                <span class="text-muted">Usuarios activos:</span>
+                                <span class="badge bg-success ms-2" th:text="${usuariosActivos ?: 0}">0</span>
+                            </div>
+                            <div class="mb-3">
+                                <span class="text-muted">Administradores:</span>
+                                <span class="badge bg-danger ms-2" th:text="${totalAdministradores ?: 0}">0</span>
+                            </div>
+                            <div class="mb-3">
+                                <span class="text-muted">Profesores:</span>
+                                <span class="badge bg-warning ms-2" th:text="${totalProfesores ?: 0}">0</span>
+                            </div>
+                            <div class="mb-3">
+                                <span class="text-muted">Estudiantes:</span>
+                                <span class="badge bg-info ms-2" th:text="${totalEstudiantes ?: 0}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-download me-2"></i>Exportar
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-success" disabled>
+                                <i class="fas fa-file-excel me-2"></i>Exportar a Excel
+                            </button>
+                            <button class="btn btn-outline-danger" disabled>
+                                <i class="fas fa-file-pdf me-2"></i>Exportar a PDF
+                            </button>
+                            <button class="btn btn-outline-info" disabled>
+                                <i class="fas fa-file-csv me-2"></i>Exportar a CSV
+                            </button>
+                        </div>
+                        <small class="text-muted d-block mt-2">
+                            Funcionalidad en desarrollo
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consultas predefinidas -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bookmark me-2"></i>Consultas Predefinidas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <button class="btn btn-outline-primary w-100" onclick="buscarPredefinida('usuarios_activos')">
+                                    <i class="fas fa-user-check me-2"></i>Usuarios Activos
+                                </button>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <button class="btn btn-outline-warning w-100" onclick="buscarPredefinida('usuarios_inactivos')">
+                                    <i class="fas fa-user-times me-2"></i>Usuarios Inactivos
+                                </button>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <button class="btn btn-outline-info w-100" onclick="buscarPredefinida('usuarios_recientes')">
+                                    <i class="fas fa-clock me-2"></i>Usuarios Recientes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Simulación de funcionalidad de búsqueda
+            document.getElementById('filtrosForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                realizarBusqueda();
+            });
+
+            function realizarBusqueda() {
+                const resultados = document.getElementById('resultados');
+                resultados.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><p class="mt-2">Buscando...</p></div>';
+                
+                setTimeout(() => {
+                    resultados.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Funcionalidad de búsqueda en desarrollo. Los filtros y resultados serán implementados próximamente.</div>';
+                }, 1500);
+            }
+
+            function buscarPredefinida(tipo) {
+                const resultados = document.getElementById('resultados');
+                resultados.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><p class="mt-2">Cargando consulta predefinida...</p></div>';
+                
+                setTimeout(() => {
+                    let mensaje = '';
+                    switch(tipo) {
+                        case 'usuarios_activos':
+                            mensaje = 'Mostrando usuarios activos en el sistema';
+                            break;
+                        case 'usuarios_inactivos':
+                            mensaje = 'Mostrando usuarios inactivos en el sistema';
+                            break;
+                        case 'usuarios_recientes':
+                            mensaje = 'Mostrando usuarios registrados recientemente';
+                            break;
+                    }
+                    resultados.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>' + mensaje + ' (funcionalidad en desarrollo)</div>';
+                }, 1000);
+            }
+
+            // Limpiar formulario
+            document.querySelector('button[type="reset"]').addEventListener('click', function() {
+                document.getElementById('resultados').innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-search fa-3x mb-3"></i><p>Realiza una búsqueda para ver los resultados</p></div>';
+            });
+        </script>
+    </main>
+    
+    <!-- Footer -->
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
+</html>

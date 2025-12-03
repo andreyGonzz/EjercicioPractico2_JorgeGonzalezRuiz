@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layouts/base :: layout(~{::title}, ~{::main}, 'ADMIN')">
+<head>
+    <title>Gestión de Roles</title>
+</head>
+<body>
+    <main th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fas fa-user-tag me-2"></i>Gestión de Roles
+            </h1>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCrearRol">
+                <i class="fas fa-plus me-1"></i>Nuevo Rol
+            </button>
+        </div>
+
+        <!-- Mensajes de alerta -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Tabla de roles -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Lista de Roles</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Descripción</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="rol : ${roles}">
+                                        <td th:text="${rol.id}"></td>
+                                        <td>
+                                            <span class="badge bg-primary" th:text="${rol.nombre}"></span>
+                                        </td>
+                                        <td th:text="${rol.descripcion}"></td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-warning" 
+                                                        th:if="${rol.nombre != 'ADMIN'}"
+                                                        data-bs-toggle="modal" 
+                                                        th:data-bs-target="'#modalEditarRol' + ${rol.id}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger"
+                                                        th:if="${rol.nombre != 'ADMIN'}"
+                                                        data-bs-toggle="modal"
+                                                        th:data-bs-target="'#modalEliminarRol' + ${rol.id}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Información</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <h6>Restricciones:</h6>
+                            <ul class="mb-0">
+                                <li>El rol <strong>ADMIN</strong> no puede ser modificado ni eliminado</li>
+                                <li>Los nombres de roles deben ser únicos</li>
+                            </ul>
+                        </div>
+                        
+                        <h6>Estadísticas:</h6>
+                        <div class="mb-2">
+                            <small class="text-muted">Total de roles:</small>
+                            <span class="badge bg-primary ms-2" th:text="${#lists.size(roles)}">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Crear Rol -->
+        <div class="modal fade" id="modalCrearRol" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Crear Nuevo Rol</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form th:action="@{/admin/roles/crear}" method="post">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre del Rol</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required maxlength="100">
+                            </div>
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="descripcion" name="descripcion" rows="3" maxlength="255"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Crear Rol</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modales para editar roles -->
+        <div th:each="rol : ${roles}" th:if="${rol.nombre != 'ADMIN'}">
+            <div class="modal fade" th:id="'modalEditarRol' + ${rol.id}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Editar Rol</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form th:action="@{/admin/roles/actualizar}" method="post">
+                            <input type="hidden" name="id" th:value="${rol.id}">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre del Rol</label>
+                                    <input type="text" class="form-control" name="nombre" th:value="${rol.nombre}" required maxlength="100">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Descripción</label>
+                                    <textarea class="form-control" name="descripcion" rows="3" maxlength="255" th:text="${rol.descripcion}"></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-warning">Actualizar Rol</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modales para eliminar roles -->
+        <div th:each="rol : ${roles}" th:if="${rol.nombre != 'ADMIN'}">
+            <div class="modal fade" th:id="'modalEliminarRol' + ${rol.id}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title text-danger">Eliminar Rol</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                ¿Está seguro que desea eliminar el rol <strong th:text="${rol.nombre}"></strong>?
+                            </div>
+                            <p><small class="text-muted">Esta acción no se puede deshacer.</small></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <form th:action="@{'/admin/roles/eliminar/' + ${rol.id}}" method="post" style="display: inline;">
+                                <button type="submit" class="btn btn-danger">Eliminar Rol</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

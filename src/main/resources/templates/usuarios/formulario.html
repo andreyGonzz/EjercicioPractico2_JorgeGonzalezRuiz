@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layouts/base :: layout(~{::title}, ~{::main}, 'ADMIN')">
+<head>
+    <title th:text="${usuario.id == null ? 'Nuevo Usuario' : 'Editar Usuario'}">Formulario Usuario</title>
+</head>
+<body>
+    <main th:fragment="content">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">
+                            <i class="fas fa-user-plus me-2" th:if="${usuario.id == null}"></i>
+                            <i class="fas fa-user-edit me-2" th:unless="${usuario.id == null}"></i>
+                            <span th:text="${usuario.id == null ? 'Nuevo Usuario' : 'Editar Usuario'}"></span>
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Mensajes de alerta -->
+                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span th:text="${success}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <span th:text="${error}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <form th:action="@{/admin/usuarios/guardar}" th:object="${usuario}" method="post">
+                            <input type="hidden" th:field="*{id}">
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" th:field="*{nombre}" 
+                                           id="nombre" required maxlength="150">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="apellido" class="form-label">Apellido <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" th:field="*{apellido}" 
+                                           id="apellido" required maxlength="150">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" th:field="*{email}" 
+                                       id="email" required maxlength="200">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password" class="form-label">
+                                    Password <span class="text-danger" th:if="${usuario.id == null}">*</span>
+                                    <small class="text-muted" th:if="${usuario.id != null}">(dejar en blanco para mantener la actual)</small>
+                                </label>
+                                <input type="password" class="form-control" th:field="*{password}" 
+                                       id="password" th:required="${usuario.id == null}" maxlength="255">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="rolId" class="form-label">Rol <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="rolId" id="rolId" required>
+                                        <option value="">Seleccione un rol</option>
+                                        <option th:each="rol : ${roles}" 
+                                                th:value="${rol.id}" 
+                                                th:text="${rol.nombre + ' - ' + rol.descripcion}"
+                                                th:selected="${usuario.rol != null and usuario.rol.id == rol.id}">
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3" th:if="${usuario.id != null}">
+                                    <label for="activo" class="form-label">Estado</label>
+                                    <select class="form-select" th:field="*{activo}" id="activo">
+                                        <option th:value="true">Activo</option>
+                                        <option th:value="false">Inactivo</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-1"></i>
+                                    <span th:text="${usuario.id == null ? 'Crear Usuario' : 'Actualizar Usuario'}"></span>
+                                </button>
+                                <a href="/admin/usuarios" class="btn btn-secondary">
+                                    <i class="fas fa-times me-1"></i>Cancelar
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

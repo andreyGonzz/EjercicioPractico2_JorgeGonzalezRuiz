@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Editar Usuario')}"></head>
+<body>
+    <!-- Header -->
+    <header th:replace="~{fragments/layout :: header}"></header>
+    
+    <!-- Navbar dinámico -->
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    
+    <!-- Main Content -->
+    <main class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-user-edit me-2 text-warning"></i>Editar Usuario
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Mensajes de error -->
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <span th:text="${error}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        
+                        <!-- Información actual -->
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Editando usuario: <strong th:text="${usuario.nombre + ' ' + usuario.apellido}">Usuario</strong>
+                            <br>
+                            <small>ID: <span th:text="${usuario.id}">0</span> | Rol actual: <span th:text="${usuario.rol.nombre}">ROL</span></small>
+                        </div>
+                        
+                        <form th:action="@{/admin/usuarios/{id}(id=${usuario.id})}" method="post">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nombre" class="form-label">
+                                        <i class="fas fa-user me-2"></i>Nombre *
+                                    </label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" 
+                                           th:value="${usuario.nombre}" required maxlength="100">
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="apellido" class="form-label">
+                                        <i class="fas fa-user me-2"></i>Apellido *
+                                    </label>
+                                    <input type="text" class="form-control" id="apellido" name="apellido" 
+                                           th:value="${usuario.apellido}" required maxlength="100">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope me-2"></i>Email *
+                                </label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       th:value="${usuario.email}" required maxlength="255">
+                                <div class="form-text">
+                                    Este email será usado para iniciar sesión en el sistema.
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-lock me-2"></i>Nueva Contraseña
+                                </label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="password" name="password" 
+                                           minlength="6" placeholder="Dejar en blanco para mantener la actual">
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">
+                                    Deja este campo vacío si no deseas cambiar la contraseña. Si ingresas una nueva, debe tener al menos 6 caracteres.
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="rolId" class="form-label">
+                                    <i class="fas fa-user-tag me-2"></i>Rol *
+                                </label>
+                                <select class="form-select" id="rolId" name="rolId" required>
+                                    <option th:each="rol : ${roles}" 
+                                            th:value="${rol.id}" 
+                                            th:selected="${rol.id == usuario.rol.id}"
+                                            th:text="${rol.nombre + ' - ' + rol.descripcion}">
+                                        Rol - Descripción
+                                    </option>
+                                </select>
+                                <div class="form-text">
+                                    El rol determina los permisos y accesos del usuario en el sistema.
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                                           th:checked="${usuario.activo}">
+                                    <label class="form-check-label" for="activo">
+                                        <i class="fas fa-user-check me-2"></i>Usuario activo
+                                    </label>
+                                    <div class="form-text">
+                                        Los usuarios inactivos no pueden acceder al sistema.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Información adicional -->
+                            <div class="card bg-light mb-4">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-info-circle me-2"></i>Estado Actual
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Rol Actual:</small>
+                                            <div>
+                                                <span class="badge" 
+                                                      th:classappend="${usuario.rol.nombre == 'ADMIN'} ? 'bg-danger' : 
+                                                                     (${usuario.rol.nombre == 'PROFESOR'} ? 'bg-success' : 'bg-primary')"
+                                                      th:text="${usuario.rol.nombre}">ROL</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Estado Actual:</small>
+                                            <div>
+                                                <span class="badge" 
+                                                      th:classappend="${usuario.activo} ? 'bg-success' : 'bg-secondary'"
+                                                      th:text="${usuario.activo} ? 'Activo' : 'Inactivo'">Estado</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a th:href="@{/admin/usuarios/{id}(id=${usuario.id})}" class="btn btn-secondary me-md-2">
+                                    <i class="fas fa-times me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-save me-2"></i>Actualizar Usuario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+    
+    <script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const password = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (password.type === 'password') {
+                password.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                password.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    </script>
+</body>
+</html>

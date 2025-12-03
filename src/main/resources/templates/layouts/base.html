@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(${title})}"></head>
+<body>
+    <!-- Header -->
+    <header th:replace="~{fragments/layout :: header}"></header>
+    
+    <!-- Navbar dinámico según el rol del usuario autenticado -->
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    
+    <!-- Main Content -->
+    <main th:fragment="content">
+        <!-- El contenido se insertará aquí -->
+    </main>
+    
+    <!-- Footer -->
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

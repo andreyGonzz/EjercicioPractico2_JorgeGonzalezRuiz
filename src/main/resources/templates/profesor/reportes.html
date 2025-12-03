@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Reportes - Profesor')}"></head>
+<body>
+    <!-- Header -->
+    <header th:replace="~{fragments/layout :: header}"></header>
+    
+    <!-- Navbar dinámico -->
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    
+    <!-- Main Content -->
+    <main class="container mt-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="mb-4">
+                    <i class="fas fa-chart-line me-2"></i>Reportes Académicos
+                </h1>
+                <p class="text-muted">
+                    <i class="fas fa-calendar me-1"></i>
+                    Reporte generado el <span th:text="${#temporals.format(fechaReporte, 'dd/MM/yyyy')}"></span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Estadísticas generales -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h3 th:text="${reporteData.totalEstudiantes}">0</h3>
+                                <p class="mb-0">Total de Estudiantes</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-graduation-cap fa-3x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h3 th:text="${reporteData.estudiantesActivos}">0</h3>
+                                <p class="mb-0">Estudiantes Activos</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-user-check fa-3x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h3 th:text="${reporteData.promedioGeneral}">0</h3>
+                                <p class="mb-0">Promedio General</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-star fa-3x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reportes por materia -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-book me-2"></i>Rendimiento por Materia
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Materia</th>
+                                        <th>Estudiantes</th>
+                                        <th>Promedio</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="materia : ${materias}">
+                                        <td>
+                                            <i class="fas fa-book me-2"></i>
+                                            <span th:text="${materia.nombre}"></span>
+                                        </td>
+                                        <td th:text="${materia.estudiantes}"></td>
+                                        <td>
+                                            <span th:text="${materia.promedio}" class="badge bg-primary"></span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${materia.promedio >= 8.0}" class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>Excelente
+                                            </span>
+                                            <span th:if="${materia.promedio >= 7.0 && materia.promedio < 8.0}" class="badge bg-warning">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>Bueno
+                                            </span>
+                                            <span th:if="${materia.promedio < 7.0}" class="badge bg-danger">
+                                                <i class="fas fa-times me-1"></i>Necesita Mejora
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de asistencia -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Asistencia Mensual
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div th:each="mes : ${asistenciaMensual}" class="col-md-3 mb-3">
+                                <div class="text-center">
+                                    <h6 th:text="${mes.mes}"></h6>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-success" role="progressbar" 
+                                             th:style="'width: ' + ${mes.asistencia} + '%'"
+                                             th:text="${mes.asistencia + '%'}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones rápidas -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-tools me-2"></i>Acciones Rápidas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <button class="btn btn-primary w-100">
+                                    <i class="fas fa-file-export me-2"></i>Exportar Reportes
+                                </button>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <button class="btn btn-info w-100">
+                                    <i class="fas fa-calendar me-2"></i>Programar Evaluación
+                                </button>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <button class="btn btn-warning w-100">
+                                    <i class="fas fa-bell me-2"></i>Enviar Notificación
+                                </button>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <button class="btn btn-success w-100">
+                                    <i class="fas fa-plus me-2"></i>Nueva Actividad
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h3 th:text="${(totalEstudiantes ?: 0) - (estudiantesActivos ?: 0)}">0</h3>
+                                <p class="mb-0">Estudiantes Inactivos</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-user-times fa-3x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos y reportes -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>Distribución de Estudiantes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="estudiantesChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Resumen</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Total registrados:</span>
+                                <span class="badge bg-primary" th:text="${totalEstudiantes ?: 0}">0</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Activos:</span>
+                                <span class="badge bg-success" th:text="${estudiantesActivos ?: 0}">0</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Inactivos:</span>
+                                <span class="badge bg-secondary" th:text="${(totalEstudiantes ?: 0) - (estudiantesActivos ?: 0)}">0</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Porcentaje activos:</span>
+                                <span class="badge bg-info" 
+                                      th:text="${totalEstudiantes > 0 ? (#numbers.formatDecimal(estudiantesActivos * 100.0 / totalEstudiantes, 1, 1)) + '%' : '0%'}">0%</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de reportes -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-table me-2"></i>Reportes Disponibles
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-left-primary">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="fas fa-file-alt me-2"></i>Reporte de Actividad
+                                        </h6>
+                                        <p class="card-text">Análisis de la actividad de los estudiantes en el sistema.</p>
+                                        <button class="btn btn-outline-primary btn-sm" disabled>
+                                            <i class="fas fa-download me-1"></i>Generar Reporte
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-left-success">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="fas fa-chart-bar me-2"></i>Reporte de Participación
+                                        </h6>
+                                        <p class="card-text">Estadísticas de participación y engagement de estudiantes.</p>
+                                        <button class="btn btn-outline-success btn-sm" disabled>
+                                            <i class="fas fa-download me-1"></i>Generar Reporte
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Los reportes detallados están en desarrollo. Por ahora puedes ver las estadísticas generales arriba.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Script para el gráfico -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script th:inline="javascript">
+            document.addEventListener('DOMContentLoaded', function() {
+                const ctx = document.getElementById('estudiantesChart').getContext('2d');
+                const totalEstudiantes = /*[[${totalEstudiantes ?: 0}]]*/ 0;
+                const estudiantesActivos = /*[[${estudiantesActivos ?: 0}]]*/ 0;
+                const estudiantesInactivos = totalEstudiantes - estudiantesActivos;
+                
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Activos', 'Inactivos'],
+                        datasets: [{
+                            data: [estudiantesActivos, estudiantesInactivos],
+                            backgroundColor: ['#28a745', '#6c757d'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+    </main>
+    
+    <!-- Footer -->
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

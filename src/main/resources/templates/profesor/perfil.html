@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Mi Perfil - Profesor')}"></head>
+<body>
+    <!-- Header -->
+    <header th:replace="~{fragments/layout :: header}"></header>
+    
+    <!-- Navbar dinámico -->
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    
+    <!-- Main Content -->
+    <main class="container mt-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="mb-4">
+                    <i class="fas fa-user-tie me-2"></i>Mi Perfil Académico
+                </h1>
+            </div>
+        </div>
+
+        <!-- Información personal -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Información Personal
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-sm-3">
+                                <strong>Nombre Completo:</strong>
+                            </div>
+                            <div class="col-sm-9">
+                                <span th:text="${usuario != null ? usuario.nombre + ' ' + usuario.apellido : 'No disponible'}">
+                                    Nombre Apellido
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-3">
+                                <strong>Email:</strong>
+                            </div>
+                            <div class="col-sm-9">
+                                <span th:text="${usuario?.email}" class="text-muted">email@ejemplo.com</span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-3">
+                                <strong>Rol:</strong>
+                            </div>
+                            <div class="col-sm-9">
+                                <span class="badge bg-warning text-dark">
+                                    <i class="fas fa-chalkboard-teacher me-1"></i>
+                                    <span th:text="${rol}">Profesor</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-3">
+                                <strong>Estado:</strong>
+                            </div>
+                            <div class="col-sm-9">
+                                <span th:if="${usuario?.activo}" class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Activo
+                                </span>
+                                <span th:unless="${usuario?.activo}" class="badge bg-danger">
+                                    <i class="fas fa-times me-1"></i>Inactivo
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-3">
+                                <strong>Fecha de Registro:</strong>
+                            </div>
+                            <div class="col-sm-9">
+                                <span th:text="${fechaRegistro != null ? #temporals.format(fechaRegistro, 'dd/MM/yyyy HH:mm') : 'No disponible'}"
+                                      class="text-muted">
+                                    01/01/2024 10:00
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información académica -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-graduation-cap me-2"></i>Información Académica
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-sm-3">
+                                <strong>Especialidad:</strong>
+                            </div>
+                            <div class="col-sm-9">
+                                <span class="text-muted">Ciencias Exactas y Naturales</span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-3">
+                                <strong>Materias a cargo:</strong>
+                            </div>
+                            <div class="col-sm-9">
+                                <span class="badge bg-primary me-1">Matemáticas</span>
+                                <span class="badge bg-primary me-1">Física</span>
+                                <span class="badge bg-primary">Química</span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-3">
+                                <strong>Estudiantes a cargo:</strong>
+                            </div>
+                            <div class="col-sm-9">
+                                <span class="badge bg-info">45 estudiantes</span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-3">
+                                <strong>Horario de atención:</strong>
+                            </div>
+                            <div class="col-sm-9">
+                                <span class="text-muted">Lunes a Viernes: 8:00 AM - 4:00 PM</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel lateral -->
+            <div class="col-md-4">
+                <!-- Avatar y acciones rápidas -->
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-user-circle fa-5x text-warning"></i>
+                        </div>
+                        <h5 th:text="${usuario != null ? usuario.nombre + ' ' + usuario.apellido : 'Usuario'}">
+                            Nombre del Profesor
+                        </h5>
+                        <p class="text-muted mb-3">Profesor</p>
+                        
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-edit me-2"></i>Editar Perfil
+                            </button>
+                            <button class="btn btn-outline-secondary">
+                                <i class="fas fa-key me-2"></i>Cambiar Contraseña
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estadísticas rápidas -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Resumen de Actividad
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h4 class="text-primary">3</h4>
+                                <small class="text-muted">Materias</small>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="text-success">45</h4>
+                                <small class="text-muted">Estudiantes</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h4 class="text-warning">8.5</h4>
+                                <small class="text-muted">Promedio</small>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="text-info">92%</h4>
+                                <small class="text-muted">Asistencia</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones rápidas -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-bolt me-2"></i>Acciones Rápidas
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/profesor/reportes" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-chart-line me-2"></i>Ver Reportes
+                            </a>
+                            <button class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-plus me-2"></i>Nueva Evaluación
+                            </button>
+                            <button class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-bell me-2"></i>Enviar Notificación
+                            </button>
+                            <button class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-calendar me-2"></i>Ver Calendario
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

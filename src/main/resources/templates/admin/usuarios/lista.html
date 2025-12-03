@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Gestión de Usuarios')}"></head>
+<body>
+    <!-- Header -->
+    <header th:replace="~{fragments/layout :: header}"></header>
+    
+    <!-- Navbar dinámico -->
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    
+    <!-- Main Content -->
+    <main class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>
+                        <i class="fas fa-users me-2 text-primary"></i>Gestión de Usuarios
+                    </h2>
+                    <a href="/admin/usuarios/nuevo" class="btn btn-success">
+                        <i class="fas fa-user-plus me-2"></i>Nuevo Usuario
+                    </a>
+                </div>
+                
+                <!-- Mensajes de éxito/error -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <!-- Tabla de usuarios -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>Lista de Usuarios
+                            <span class="badge bg-secondary ms-2" th:text="${usuarios.size()}">0</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${usuarios.empty}" class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No hay usuarios registrados</h5>
+                            <a href="/admin/usuarios/nuevo" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Crear primer usuario
+                            </a>
+                        </div>
+                        
+                        <div th:unless="${usuarios.empty}" class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre Completo</th>
+                                        <th>Email</th>
+                                        <th>Rol</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="usuario : ${usuarios}">
+                                        <td th:text="${usuario.id}">1</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div>
+                                                    <div class="fw-bold" th:text="${usuario.nombre + ' ' + usuario.apellido}">Nombre Apellido</div>
+                                                    <small class="text-muted" th:text="'ID: ' + ${usuario.id}">ID: 1</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span th:text="${usuario.email}">email@example.com</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${usuario.rol.nombre == 'ADMIN'} ? 'bg-danger' : 
+                                                                 (${usuario.rol.nombre == 'PROFESOR'} ? 'bg-success' : 'bg-primary')"
+                                                  th:text="${usuario.rol.nombre}">ROL</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${usuario.activo} ? 'bg-success' : 'bg-secondary'"
+                                                  th:text="${usuario.activo} ? 'Activo' : 'Inactivo'">Estado</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a th:href="@{/admin/usuarios/{id}(id=${usuario.id})}" 
+                                                   class="btn btn-sm btn-outline-info" title="Ver detalles">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a th:href="@{/admin/usuarios/{id}/editar(id=${usuario.id})}" 
+                                                   class="btn btn-sm btn-outline-warning" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                        title="Eliminar" data-bs-toggle="modal" 
+                                                        th:data-bs-target="'#deleteModal' + ${usuario.id}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                            
+                                            <!-- Modal de confirmación de eliminación -->
+                                            <div class="modal fade" th:id="'deleteModal' + ${usuario.id}" tabindex="-1">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Confirmar Eliminación</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p>¿Estás seguro de que deseas eliminar al usuario?</p>
+                                                            <div class="alert alert-warning">
+                                                                <strong th:text="${usuario.nombre + ' ' + usuario.apellido}">Usuario</strong><br>
+                                                                <small th:text="${usuario.email}">email@example.com</small>
+                                                            </div>
+                                                            <small class="text-muted">Esta acción no se puede deshacer.</small>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                            <form th:action="@{/admin/usuarios/{id}/eliminar(id=${usuario.id})}" method="post" style="display: inline;">
+                                                                <button type="submit" class="btn btn-danger">
+                                                                    <i class="fas fa-trash me-2"></i>Eliminar
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Botón de regreso -->
+                <div class="mt-4">
+                    <a href="/admin/dashboard" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

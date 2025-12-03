@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Crear Rol')}"></head>
+<body>
+    <!-- Header -->
+    <header th:replace="~{fragments/layout :: header}"></header>
+    
+    <!-- Navbar dinámico -->
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    
+    <!-- Main Content -->
+    <main class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-plus me-2 text-success"></i>Crear Nuevo Rol
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Mensajes de error -->
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <span th:text="${error}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        
+                        <!-- Información sobre roles existentes -->
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Roles del Sistema:</strong> Los roles determinan los permisos y accesos de los usuarios.
+                            <br>
+                            <small>
+                                Roles actuales: <strong>ADMIN</strong>, <strong>PROFESOR</strong>, <strong>ESTUDIANTE</strong>
+                            </small>
+                        </div>
+                        
+                        <form action="/admin/roles" method="post">
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">
+                                    <i class="fas fa-tag me-2"></i>Nombre del Rol *
+                                </label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" 
+                                       required maxlength="50" placeholder="Ej: COORDINADOR, ASISTENTE">
+                                <div class="form-text">
+                                    El nombre debe ser único y descriptivo. Se recomienda usar MAYÚSCULAS.
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="descripcion" class="form-label">
+                                    <i class="fas fa-align-left me-2"></i>Descripción *
+                                </label>
+                                <textarea class="form-control" id="descripcion" name="descripcion" rows="4" 
+                                          required maxlength="255" placeholder="Describe las responsabilidades y funciones de este rol..."></textarea>
+                                <div class="form-text">
+                                    Proporciona una descripción clara de las funciones y permisos de este rol.
+                                </div>
+                            </div>
+                            
+                            <!-- Ejemplos de roles -->
+                            <div class="card bg-light mb-4">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-lightbulb me-2"></i>Ejemplos de Roles
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="border rounded p-3">
+                                                <h6 class="text-primary">COORDINADOR</h6>
+                                                <small class="text-muted">
+                                                    Gestiona aspectos académicos específicos, supervisa profesores y estudiantes en áreas determinadas.
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="border rounded p-3">
+                                                <h6 class="text-warning">ASISTENTE</h6>
+                                                <small class="text-muted">
+                                                    Brinda soporte administrativo, acceso limitado a funciones específicas del sistema.
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="border rounded p-3">
+                                                <h6 class="text-info">INVITADO</h6>
+                                                <small class="text-muted">
+                                                    Solo lectura, acceso muy limitado para visualizar información específica.
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="border rounded p-3">
+                                                <h6 class="text-success">MODERADOR</h6>
+                                                <small class="text-muted">
+                                                    Gestiona contenido y supervisa interacciones, permisos intermedios.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Consideraciones importantes -->
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Importante:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li>Una vez creado, el nombre del rol puede modificarse pero afectará a todos los usuarios asignados</li>
+                                    <li>Los roles con usuarios asignados no pueden eliminarse</li>
+                                    <li>Los permisos específicos se configuran en el código de la aplicación</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="/admin/roles" class="btn btn-secondary me-md-2">
+                                    <i class="fas fa-times me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-2"></i>Crear Rol
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+    
+    <script>
+        // Auto-uppercase for role name
+        document.getElementById('nombre').addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+        });
+        
+        // Character counter for description
+        const descripcion = document.getElementById('descripcion');
+        const maxLength = 255;
+        
+        // Create counter element
+        const counter = document.createElement('small');
+        counter.className = 'text-muted float-end';
+        counter.textContent = `0/${maxLength}`;
+        descripcion.parentElement.appendChild(counter);
+        
+        descripcion.addEventListener('input', function() {
+            const currentLength = this.value.length;
+            counter.textContent = `${currentLength}/${maxLength}`;
+            
+            if (currentLength > maxLength * 0.9) {
+                counter.className = 'text-warning float-end';
+            } else {
+                counter.className = 'text-muted float-end';
+            }
+        });
+    </script>
+</body>
+</html>
